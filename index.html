@@ -98,7 +98,8 @@ ul,ol{padding:0;list-style:none}
   z-index:6;pointer-events:none;opacity:.58;mix-blend-mode:screen;
 }
 
-.wrap{max-width:var(--maxw);margin-inline:auto;padding-inline:var(--pad)}
+/* width:100% は必須。grid/flex の子になると margin-inline:auto で内容幅に縮む */
+.wrap{width:100%;max-width:var(--maxw);margin-inline:auto;padding-inline:var(--pad)}
 section{position:relative;background:transparent;isolation:isolate}
 .sec{padding:clamp(64px,10vw,116px) 0}
 
@@ -144,7 +145,7 @@ section{position:relative;background:transparent;isolation:isolate}
 .btn{
   display:inline-flex;align-items:center;justify-content:center;gap:.65em;
   min-height:56px;padding:14px 28px;border:0;border-radius:999px;cursor:pointer;
-  font-family:var(--jp);font-weight:800;font-size:1.02rem;letter-spacing:.03em;text-align:center;
+  font-family:var(--jp);font-weight:800;font-size:1.02rem;letter-spacing:.03em;text-align:center;white-space:nowrap;
   transition:transform .4s var(--ease),box-shadow .4s var(--ease),background-color .3s;
 }
 .btn svg{flex:none}
@@ -242,9 +243,9 @@ section{position:relative;background:transparent;isolation:isolate}
 .is-stuck .logo__name{color:var(--navy)}
 .is-stuck .logo__sub{color:var(--blue)}
 
-.nav{display:none;gap:26px;font-size:.9rem;font-weight:700;color:#fff;transition:color .5s}
+.nav{display:none;gap:22px;font-size:.9rem;font-weight:700;color:#fff;transition:color .5s}
 .is-stuck .nav{color:var(--navy)}
-.nav a{position:relative;padding:6px 0}
+.nav a{position:relative;padding:6px 0;white-space:nowrap}
 .nav a::after{content:"";position:absolute;left:0;right:100%;bottom:0;height:2px;background:var(--yellow);transition:right .45s var(--ease)}
 .nav a:hover::after{right:0}
 .hdr-cta{display:flex;align-items:center;gap:10px}
@@ -254,7 +255,9 @@ section{position:relative;background:transparent;isolation:isolate}
 .is-stuck .hdr-tel .n{color:var(--navy)}
 .is-stuck .hdr-tel .l{color:var(--muted)}
 .hdr .btn{min-height:46px;padding:10px 20px;font-size:.92rem}
-@media(min-width:1000px){.nav{display:flex}.hdr-tel{display:block}}
+/* ヘッダーは詰め込むと折り返すので、余裕のある幅から段階的に出す */
+@media(min-width:1180px){.nav{display:flex}}
+@media(min-width:1320px){.hdr-tel{display:block}}
 @media(max-width:999px){.hdr .btn-line{display:none}}
 
 /* ==========================================================
@@ -380,7 +383,7 @@ section{position:relative;background:transparent;isolation:isolate}
 .hero .wrap{position:relative;z-index:2;width:100%}
 .hero__grid{display:grid;gap:clamp(28px,4vw,46px)}
 @media(min-width:960px){.hero__grid{grid-template-columns:1.12fr .88fr;align-items:end}}
-.hero h1{font-size:clamp(2.3rem,8.4vw,4.5rem);font-weight:900;line-height:1.24;color:#fff;letter-spacing:.01em;
+.hero h1{font-size:clamp(2.3rem,6.2vw,4.2rem);font-weight:900;line-height:1.24;color:#fff;letter-spacing:.01em;
   text-shadow:0 4px 30px rgba(0,20,40,.45)}
 .hero h1 span{display:block}
 .hero h1 em{font-style:normal;color:var(--yellow)}
@@ -408,6 +411,15 @@ section{position:relative;background:transparent;isolation:isolate}
 @keyframes cue{0%{transform:scaleY(0);transform-origin:top}45%{transform:scaleY(1);transform-origin:top}
   55%{transform:scaleY(1);transform-origin:bottom}100%{transform:scaleY(0);transform-origin:bottom}}
 @media(min-width:960px){.scrollcue{display:block}}
+/* スマホ：固定CTAバー(64px)にヒーローのCTAが隠れないよう詰める */
+@media(max-width:560px){
+  .hero{padding-top:96px}
+  .hero__sub{margin-top:16px}
+  .hero__badges{margin-top:14px;gap:6px}
+  .hero__badges li{padding:6px 12px;font-size:.76rem}
+  .callbox{gap:10px;padding:18px}
+  .callbox .btn-lg{min-height:62px}
+}
 
 /* ==========================================================
    7. QUICK NAV
@@ -697,7 +709,6 @@ body{padding-bottom:0}
   <div class="bleed bleed--head" aria-hidden="true"></div>
   <!-- VIDEO 01：雪道でスタックした車へ、遠くからレッカー車が近づく -->
   <div class="scene scene--head" data-scene
-       data-webm="assets/video/scene01-approach.webm"
        data-mp4="assets/video/scene01-approach.mp4"
        data-sp="assets/video/scene01-approach-sp.mp4"
        data-poster="assets/img/scene01.jpg" aria-hidden="true">
@@ -788,7 +799,6 @@ body{padding-bottom:0}
   <div class="bleed" aria-hidden="true"></div>
   <!-- VIDEO 03：吹雪の北海道道路を救援車両が走る -->
   <div class="scene" data-scene
-       data-webm="assets/video/scene03-blizzard.webm"
        data-mp4="assets/video/scene03-blizzard.mp4"
        data-sp="assets/video/scene03-blizzard-sp.mp4"
        data-poster="assets/img/scene03.jpg" aria-hidden="true">
@@ -815,7 +825,6 @@ body{padding-bottom:0}
   <div class="bleed" aria-hidden="true"></div>
   <!-- VIDEO 02：女性オペレーターがコールセンターで電話対応 -->
   <div class="scene" data-scene
-       data-webm="assets/video/scene02-callcenter.webm"
        data-mp4="assets/video/scene02-callcenter.mp4"
        data-sp="assets/video/scene02-callcenter-sp.mp4"
        data-poster="assets/img/scene02.jpg" aria-hidden="true">
@@ -867,7 +876,6 @@ body{padding-bottom:0}
   <div class="bleed" aria-hidden="true"></div>
   <!-- VIDEO 04：雪道でスタックした車をウインチで安全に救援 -->
   <div class="scene" data-scene
-       data-webm="assets/video/scene04-winch.webm"
        data-mp4="assets/video/scene04-winch.mp4"
        data-sp="assets/video/scene04-winch-sp.mp4"
        data-poster="assets/img/scene04.jpg" aria-hidden="true">
@@ -898,7 +906,6 @@ body{padding-bottom:0}
   <div class="bleed" aria-hidden="true"></div>
   <!-- VIDEO 05：側溝へ脱輪した車両の救援 -->
   <div class="scene" data-scene
-       data-webm="assets/video/scene05-ditch.webm"
        data-mp4="assets/video/scene05-ditch.mp4"
        data-sp="assets/video/scene05-ditch-sp.mp4"
        data-poster="assets/img/scene05.jpg" aria-hidden="true">
@@ -1064,7 +1071,6 @@ body{padding-bottom:0}
   <div class="bleed" aria-hidden="true"></div>
   <!-- VIDEO 06：作業終了後、ドライバーとスタッフが安心して会話 -->
   <div class="scene" data-scene
-       data-webm="assets/video/scene06-driver.webm"
        data-mp4="assets/video/scene06-driver.mp4"
        data-sp="assets/video/scene06-driver-sp.mp4"
        data-poster="assets/img/scene06.jpg" aria-hidden="true">
@@ -1093,7 +1099,6 @@ body{padding-bottom:0}
   <div class="bleed" aria-hidden="true"></div>
   <!-- VIDEO 01（夜の雪道／作業灯）を再利用 -->
   <div class="scene" data-scene
-       data-webm="assets/video/scene01-approach.webm"
        data-mp4="assets/video/scene01-approach.mp4"
        data-sp="assets/video/scene01-approach-sp.mp4"
        data-poster="assets/img/scene01.jpg" aria-hidden="true">

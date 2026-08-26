@@ -39,27 +39,48 @@ sed -i 's/0120-000-000/011-000-0000/g; s/tel:0120000000/tel:0110000000/g' index.
 
 ---
 
-## 2. 動画の入れ方
+## 2. 動画（配置済み）
 
-`assets/video/` にファイルを置くだけで自動的に再生されます（HTML編集不要）。
+`assets/video/` に配置済みで、`index.html` の編集なしに自動再生されます。
 
-| ファイル名 | 内容 |
-|---|---|
-| `scene01-approach` | 雪道でスタックした車へ、遠くからレッカー車が近づく（FV・最終CTAで使用） |
-| `scene02-callcenter` | 女性オペレーターがコールセンターで電話対応 |
-| `scene03-blizzard` | 吹雪の北海道道路を救援車両が走る |
-| `scene04-winch` | 雪道でスタックした車をウインチで安全に救援 |
-| `scene05-ditch` | 側溝へ脱輪した車両の救援 |
-| `scene06-driver` | 作業終了後、ドライバーとスタッフが安心して会話 |
+| ファイル | 使用箇所 | 内容 |
+|---|---|---|
+| `scene01-approach` | FV・最終CTA | 埋まったタイヤ → 吹雪の奥から近づくライト → レッカー車到着 |
+| `scene02-callcenter` | CALL CENTER | コールセンター外観 → 地図モニター → 女性オペレーター |
+| `scene03-blizzard` | CINEMATIC MESSAGE | 雪原の道を空撮 → 運転席のドライバー → 薄暮を走る救援車 |
+| `scene04-winch` | SNOW RESCUE | 雪を歩くスタッフ → 深雪に埋まるSUV → 現場のSUVと救援車 |
+| `scene05-ditch` | 脱輪・落輪 | 雪に落ちた乗用車 → 警告灯クローズアップ → ワイヤー牽引 |
+| `scene06-driver` | MESSAGE | 雪の結晶 → 雪原のスタッフと車 → 朝焼けの道 |
 
-各シーンにつき最大3ファイル（あるものだけでOK）：
+### 縦動画をPCで成立させる方法（重要）
 
-- `<name>.webm` … 優先再生（VP9 / 2〜4Mbps）
-- `<name>.mp4` … fallback（H.264 / 1920×1080）
-- `<name>-sp.mp4` … スマホ用軽量版（720×1280 or 1280×720 / 1〜1.5Mbps）
-- `assets/img/scene0X.jpg` … poster画像（1600×900程度、WebP/AVIF可）
+支給素材は **496×864 の縦9:16／15.07秒／24fps** でした。
+スマホでは画面にぴったり合いますが、PCで全画面にすると **2.9倍拡大＋上下36%だけの切り抜き** になり破綻します。
+そのため2種類を書き出しています。
 
-推奨：**音声トラックなし・8〜15秒ループ・16:9**。仕様どおり cinematic / realistic / Japanese Hokkaido winter で統一。
+- **`sceneXX.mp4`（PC用・1920×1080）** … 同じ素材から作った**アンビエント合成**。
+  背景＝素材を全面に伸ばして `gblur sigma=48` で強くぼかした「光の場」、
+  中央＝620×1080 のシャープな縦パネル、境界は **240px フェザー**で溶かしてある。
+  ぼけが被写界深度として読めるため、縦素材でも横位置で成立する。
+- **`sceneXX-sp.mp4`（スマホ用・496×864）** … 素材そのまま。`max-width:767px` で自動選択。
+- **`assets/img/sceneXX.jpg`（poster・1600×900）** … 各動画の**冒頭0.2秒**から生成。
+  再生開始フレームと一致するので、poster→動画の切り替わりで画が飛ばない。
+
+合計 26MB（PC用 3.2〜3.9MB／スマホ用 0.8〜1.5MB）。全て音声トラック無し。
+
+### 差し替え・追加する場合
+
+ファイル名を保ったまま `assets/video/` に置き換えれば、そのまま反映されます。
+横16:9の素材が新たに用意できた場合は、アンビエント合成は不要なので普通に1920×1080で書き出してください。
+WebMは（PC用mp4が既に3MB台で実利が小さいため）作っていません。追加する場合は
+`assets/video/sceneXX.webm` を置き、`index.html` の各シーンに
+`data-webm="assets/video/sceneXX.webm"` を1行足せば、mp4より優先して読み込まれます。
+
+再エンコードに使ったコマンドの要点：
+
+```bash
+ffmpeg -i src.mp4 -i feather.png -filter_complex  "[0:v]scale=2400:1350:force_original_aspect_ratio=increase,crop=2400:1350,gblur=sigma=48,eq=brightness=-0.03:saturation=0.80,scale=1920:1080[bg];  [0:v]scale=620:1080[fgc];[1:v]format=gray[m];[fgc][m]alphamerge[fg];  [bg][fg]overlay=(W-w)/2:0,format=yuv420p"  -an -c:v libx264 -preset slow -crf 25 -movflags +faststart out.mp4
+```
 
 ### 動画を読み込まない条件（自動フォールバック）
 
@@ -70,7 +91,7 @@ sed -i 's/0120-000-000/011-000-0000/g; s/tel:0120000000/tel:0110000000/g' index.
 - 低速回線（`effectiveType` が 2g 系）／ブラウザの省データ設定 `saveData`
 - 自動再生がブラウザにブロックされた
 
-また画面外のシーンは `pause()` し、`IntersectionObserver` で可視領域に入ってから初めて読み込みます。
+また画面外のシーンは `pause()` し、可視領域に入ってから初めて読み込みます（FV以外は先読みしません）。
 
 ---
 
@@ -175,8 +196,7 @@ python -m http.server 8931
 
 `http://localhost:8931/` を開く（`.claude/launch.json` にも同設定あり）。
 
-動画・poster を配置するまでは、コンソールに `assets/video/...` `assets/img/scene0X.jpg` の **404 が出ますが正常**です。
-各シーンにつき1回だけ試行してリトライはせず、CSS製の背景に自動で落ちます。
+
 
 ---
 
@@ -189,4 +209,4 @@ python -m http.server 8931
 - [ ] OGP画像 `assets/img/ogp.jpg`（1200×630）を配置
 - [ ] 提供していないサービスカードを削除
 - [ ] privacy.html の制定日・改定日・窓口を記入
-- [ ] 動画・poster画像を配置（未配置でも公開可）
+- [x] 動画・poster画像を配置（完了）
